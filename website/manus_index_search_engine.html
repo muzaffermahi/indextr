@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="manus_ui-functions.js"></script>
+    <script>
+        // DEBUGGING NUCLEAR OPTION
+        console.log("🔥 DEBUGGING: Page loaded, checking functions...");
+        console.log("displayResults exists?", typeof displayResults);
+        console.log("createArticleCard exists?", typeof createArticleCard);
+        console.log("showError exists?", typeof showError);
+        console.log("Showloading exists?", typeof showLoading);
+        console.log("HideLoading exists?", typeof hideLoading);
+        
+        // Test if functions are actually callable
+        if (typeof displayResults === 'undefined') {
+            console.error("💀 DISASTER: displayResults is not defined!");
+            alert("UI functions failed to load - check ui-functions.js");
+        }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Knowledge Search Engine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #21262d 100%);
+            min-height: 100vh;
+            color: #e6edf3;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 0;
+        }
+
+        .header h1 {
+            color: #f0f6fc;
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: 300;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            background: linear-gradient(135deg, #58a6ff, #bc8cff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: #8b949e;
+            font-size: 1.2em;
+        }
+
+        .search-section {
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 60px 40px;
+            box-shadow: none;
+            margin-bottom: 50px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .search-form {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .search-input-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 18px 50px 18px 20px;
+            border: 2px solid #30363d;
+            border-radius: 50px;
+            font-size: 18px;
+            background: #21262d;
+            color: #e6edf3;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #58a6ff;
+            box-shadow: 0 8px 30px rgba(88, 166, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .search-input::placeholder {
+            color: #8b949e;
+            font-style: italic;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8b949e;
+            font-size: 20px;
+            pointer-events: none;
+        }
+
+        .search-controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .relevance-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #191d21;
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: 1px solid #30363d;
+            transition: all 0.3s ease;
+        }
+
+        .relevance-control:hover {
+            border-color: #58a6ff;
+            box-shadow: 0 4px 12px rgba(88, 166, 255, 0.1);
+        }
+
+        .relevance-control label {
+            color: #f0f6fc;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .relevance-control input[type="range"] {
+            width: 120px;
+            height: 6px;
+            background: #30363d;
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .relevance-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #58a6ff, #bc8cff);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(88, 166, 255, 0.3);
+        }
+
+        .relevance-control input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #58a6ff, #bc8cff);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(88, 166, 255, 0.3);
+        }
+
+        .search-btn {
+            padding: 18px 18px;
+            background: linear-gradient(135deg, #58a6ff 0%, #bc8cff 100%);
+            color: linear-gradient(135deg, #858e97, #323437);
+            border: none;
+            border-radius: 50px;
+            font-size: 24px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            min-width: 300px;
+            box-shadow: 0 4px 20px rgba(88, 166, 255, 0.3);
+        }
+
+        .search-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(88, 166, 255, 0.4);
+        }
+
+        .search-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .search-btn:disabled {
+            background: #484f58;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .collapsible-section {
+            margin-bottom: 25px;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: #0d1117;
+        }
+
+        .collapsible-section.active {
+            border-color: #58a6ff;
+            box-shadow: 0 4px 12px rgba(88, 166, 255, 0.1);
+        }
+
+        .source-header {
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+
+        .source-header:hover {
+            background: rgba(88, 166, 255, 0.1);
+        }
+
+        .source-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 25px;
+            margin: 0;
+            font-size: 1.3em;
+            color: #58a6ff;
+            background: rgba(88, 166, 255, 0.05);
+            border-left: 4px solid #58a6ff;
+        }
+
+        .expand-icon {
+            font-size: 0.8em;
+            margin-right: 10px;
+            transition: transform 0.3s ease;
+            color: #58a6ff;
+        }
+
+        .result-count {
+            font-size: 0.85em;
+            font-weight: 400;
+            color: #8b949e;
+            background: rgba(88, 166, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .source-content {
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .source-content.collapsed {
+            max-height: 0;
+            padding: 0 25px;
+            opacity: 0;
+        }
+
+        .source-content.expanded {
+            max-height: none;
+            padding: 0 25px 20px 25px;
+            opacity: 1;
+        }
+
+        .expand-all-btn, .collapse-all-btn {
+            background: linear-gradient(135deg, #58a6ff, #bc8cff);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            cursor: pointer;
+            margin-left: 15px;
+            transition: all 0.2s ease;
+        }
+
+        .expand-all-btn:hover, .collapse-all-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(88, 166, 255, 0.3);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 40px;
+            color: #8b949e;
+        }
+
+        .no-results-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .no-results h3 {
+            margin-bottom: 15px;
+            color: #f0f6fc;
+        }
+
+        .search-suggestions {
+            text-align: left;
+            max-width: 400px;
+            margin: 30px auto;
+            background: #21262d;
+            border: 1px solid #30363d;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .search-suggestions ul {
+            margin: 10px 0 0 20px;
+        }
+
+        .search-suggestions li {
+            margin-bottom: 5px;
+            color: #8b949e;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 60px 40px;
+            color: #58a6ff;
+            background: rgba(88, 166, 255, 0.05);
+            border: 1px solid #30363d;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .loading-text {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin: 20px 0;
+            background: linear-gradient(45deg, #58a6ff, #bc8cff, #58a6ff);
+            background-size: 200% 200%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: textShimmer 3s ease-in-out infinite;
+            transition: opacity 0.3s ease;
+            min-height: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes textShimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .loading-text.changing {
+            animation: textShimmer 3s ease-in-out infinite, messagePulse 0.5s ease-in-out;
+        }
+
+        @keyframes messagePulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .dynamic-spinner {
+            margin-bottom: 25px;
+        }
+
+        .emoji-spinner {
+            font-size: 4em;
+            display: inline-block;
+            animation: spin 2s linear infinite, pulse 1.5s ease-in-out infinite alternate;
+            text-shadow: 0 0 20px rgba(88, 166, 255, 0.3);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(90deg) scale(1.1); }
+            50% { transform: rotate(180deg) scale(1); }
+            75% { transform: rotate(270deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        @keyframes pulse {
+            0% { 
+                transform: scale(1);
+                filter: brightness(1);
+            }
+            100% { 
+                transform: scale(1.2);
+                filter: brightness(1.3);
+            }
+        }
+
+        .loading-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .loading-dots span {
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(45deg, #58a6ff, #bc8cff);
+            border-radius: 50%;
+            animation: bounce 1.4s ease-in-out infinite both;
+        }
+
+        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        .results-section {
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            display: none;
+        }
+
+        .results-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #30363d;
+        }
+
+        .results-title {
+            font-size: 1.8em;
+            color: #f0f6fc;
+            margin-bottom: 10px;
+        }
+
+        .results-meta {
+            color: #8b949e;
+            font-size: 0.95em;
+        }
+
+        .source-results {
+            margin-bottom: 40px;
+        }
+
+        .article-card {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 4px solid #30363d;
+            transition: all 0.3s ease;
+        }
+
+        .article-card:hover {
+            border-left-color: #58a6ff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            background: rgba(88, 166, 255, 0.02);
+        }
+
+        .article-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #f0f6fc;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .article-authors {
+            color: #58a6ff;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .article-meta {
+            color: #8b949e;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .article-keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .keyword-tag {
+            background: #58a6ff;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .article-link {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 8px 16px;
+            background: #58a6ff;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.9em;
+            transition: background 0.3s ease;
+        }
+
+        .copy-id-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 8px 16px;
+            background: #f85149;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .copy-id-btn:hover {
+            background: #da3633;
+        }
+
+        .copy-success {
+            background: #238636 !important;
+        }
+
+        .no-action {
+            margin-top: 15px;
+            padding: 8px 16px;
+            background: #656d76;
+            color: #f0f6fc;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+
+        .error-message {
+            background: rgba(248, 81, 73, 0.1);
+            color: #f85149;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #f85149;
+            border-left: 4px solid #f85149;
+        }
+
+        .relevance-threshold-group {
+            position: relative;
+        }
+
+        .relevance-threshold-group label {
+            color: linear-gradient(135deg, #858e97, #323437);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .relevance-threshold-group small {
+            color: #8b949e;
+            font-style: italic;
+        }
+
+        #similarity_Threshold , #maxResults {
+            background: linear-gradient(135deg, #bfc7cf, #333436);
+            border: 2px solid #30363d;
+            transition: all 0.3s ease;
+        }
+
+        #similarity_Threshold:hover {
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+        }
+
+        #similarity_Threshold:focus {
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
+        }
+
+        /* Custom option styling for relevance levels */
+        #similarity_Threshold option[value="high"] {
+            background: linear-gradient(135deg, #238636, #2ea043);
+            color: rgb(39, 38, 38);
+        }
+
+        #similarity_Threshold option[value="medium"] {
+            background: linear-gradient(135deg, #1f6feb, #58a6ff);
+            color: rgb(50, 50, 50);
+        }
+
+        #similarity_Threshold option[value="low"] {
+            background: linear-gradient(135deg, #f85149, #da3633);
+            color: rgb(40, 40, 40);
+        }
+
+        /* Visual indicator for the current relevance level */
+
+
+        .source-selection {
+        margin-top: 30px;
+        text-align: center;
+        background: #21262d;
+        border: 1px solid #30363d;
+        border-radius: 15px;
+        padding: 20px 15px 15px 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+        .source-selection-label {
+            display: block;
+            color: #f0f6fc;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .relevance-indicator {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            pointer-events: none;
+        }
+       
+
+        .source-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .source-button {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 24px;
+            background: #21262d;
+            border: 2px solid #30363d;
+            border-radius: 25px;
+            color: linear-gradient(135deg, #858e97, #323437);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            font-size: 15px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .source-button:hover {
+            border-color: #58a6ff;
+            background: rgba(88, 166, 255, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(88, 166, 255, 0.2);
+        }
+
+        .source-button.selected {
+            background: linear-gradient(135deg, #58a6ff, #bc8cff);
+            border-color: #58a6ff;
+            color: linear-gradient(135deg, #858e97, #323437);
+            box-shadow: 0 8px 25px rgba(88, 166, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .source-button.selected:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(88, 166, 255, 0.5);
+        }
+
+        .source-button input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #58a6ff;
+            border-radius: 6px;
+            background: transparent;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .source-button input[type="checkbox"]:checked {
+            background: #ffffff;
+            border-color: #ffffff;
+        }
+
+        .source-button input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #58a6ff;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        @media (max-width: 768px) {
+            .search-form {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .source-buttons {
+                flex-direction: column;
+            }
+
+            .source-button {
+                justify-content: flex-start;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .search-section, .results-section {
+                padding: 25px;
+            }
+
+            .emoji-spinner {
+                font-size: 3em;
+            }
+            
+            .loading-text {
+                font-size: 1.1em;
+            }
+            
+            .loading {
+                padding: 40px 20px;
+            }
+            .form-group.search-primary,
+            .form-group.search-secondary {
+                flex: 1;
+                min-width: auto;
+            }
+            .source-title {
+                font-size: 1.1em;
+                padding: 15px 20px;
+            }
+            
+            .source-content.expanded {
+                padding: 0 20px 15px 20px;
+            }
+            
+            .expand-all-btn, .collapse-all-btn {
+                display: block;
+                margin: 10px 0 5px 0;
+                width: 100%;
+            }
+
+            .source-selection {
+                margin-top: 30px;
+                text-align: center;
+                background: #21262d;
+                border: 1px solid #30363d;
+                border-radius: 15px;
+                padding: 25px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .source-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .source-button {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 24px;
+            background: #21262d;
+            border: 2px solid #30363d;
+            border-radius: 25px;
+            color: linear-gradient(135deg, #858e97, #323437);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            font-size: 15px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .source-button:hover {
+            border-color: #58a6ff;
+            background: rgba(88, 166, 255, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(88, 166, 255, 0.2);
+        }
+
+        .source-button.selected {
+            background: linear-gradient(135deg, #58a6ff, #bc8cff);
+            border-color: #58a6ff;
+            color: linear-gradient(135deg, #858e97, #323437);
+            box-shadow: 0 8px 25px rgba(88, 166, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .source-button.selected:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(88, 166, 255, 0.5);
+        }
+
+        .source-button input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #58a6ff;
+            border-radius: 6px;
+            background: transparent;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .source-button input[type="checkbox"]:checked {
+            background: #ffffff;
+            border-color: #ffffff;
+        }
+
+        .source-button input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #58a6ff;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .source-button .source-emoji {
+            font-size: 20px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .source-select {
+            padding: 12px 16px;
+            border: 2px solid #30363d;
+            border-radius: 20px;
+            font-size: 14px;
+            background: #21262d;
+            color: linear-gradient(135deg, #858e97, #323437);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .source-select:focus {
+            outline: none;
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+        }
+
+        .source-select:hover {
+            border-color: #58a6ff;
+            background: rgba(88, 166, 255, 0.05);
+        }
+
+
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>indextr.com</h1>
+            <p>Türkiye'nin akademik platformu</p>
+        </div>
+
+        <div class="search-section">
+            <form id="searchForm" class="search-form">
+                <div class="search-input-container">
+                    <input 
+                        type="text" 
+                        id="keyword" 
+                        class="search-input"
+                        placeholder="Örneğin: Konya'da arkeoloji çalışmaları"
+                        required
+                        minlength="3"
+                    >
+                </div>
+                
+                <div class="search-controls">
+                    <div class="relevance-control">
+                        <label for="similarity_Threshold">Alaka Seviyesi:</label>
+                        <select id="similarity_Threshold" class="source-select">
+                            <option value="high">Çok Alakalı</option>
+                            <option value="medium" selected>Dengeli</option>
+                            <option value="low">Geniş</option>
+                        </select>
+                    </div>
+                    <div class="relevance-control">
+                        <label for="maxResults">Sonuç Sayısı:</label>
+                        <select id="maxResults" class="source-select">
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                    
+                    <div class="source-selection">
+                        <label class="source-selection-label">Kaynak seçiniz: (birden çok seçebilirsiniz)</label>
+                        <div class="source-buttons">
+                            <label class="source-button" for="dergipark">
+                                <input type="checkbox" id="dergipark" name="sources" value="dergipark" checked>
+                                <span>Dergipark</span>
+                            </label>
+                            
+                            <label class="source-button" for="trdizin">
+                                <input type="checkbox" id="trdizin" name="sources" value="trdizin" checked>
+                                <span>TR Dizin</span>
+                            </label>
+                            
+                            <label class="source-button" for="yoktez">
+                                <input type="checkbox" id="yoktez" name="sources" value="yoktez" checked>
+                                <span>YÖK Tez (Beta, arama süresini uzatabilir)</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    
+                    <button type="submit" class="search-btn" id="searchBtn">
+                        Ara
+                    </button>
+                </div>
+            </form>
+            
+            
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="dynamic-spinner">
+                <div class="emoji-spinner" id="emojiSpinner">🔍</div>
+            </div>
+            <div class="loading-text" id="loadingText"></div>
+            <div class="loading-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="results-header">
+                <h2 class="results-title" id="resultsTitle">Arama sonuçları:</h2>
+                <div class="results-meta" id="resultsMeta"></div>
+            </div>
+            <div id="resultsContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:4000';
+
+const form = document.getElementById('searchForm');
+const keywordInput = document.getElementById('keyword');
+const sourceCheckboxes = document.querySelectorAll('input[name="sources"]');
+const searchBtn = document.getElementById('searchBtn');
+const loading = document.getElementById('loading');
+
+// Add visual feedback for checkbox selection
+sourceCheckboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        const label = this.closest('.source-button');
+        if (this.checked) {
+            label.classList.add('selected');
+        } else {
+            label.classList.remove('selected');
+        }
+    });
+    
+    // Initialize selected state
+    if (checkbox.checked) {
+        checkbox.closest('.source-button').classList.add('selected');
+    }
+});
+
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const keyword = keywordInput.value.trim();
+    const selectedSources = Array.from(sourceCheckboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
+    
+    if (keyword.length < 3) {
+        showError('Please enter at least 3 characters');
+        return;
+    }
+
+    if (selectedSources.length === 0) {
+        showError('Hiç kaynak seçmedin, deli misin? En az bir tane seç!');
+        return;
+    }
+
+    await performSearch(keyword, selectedSources);
+});
+
+async function performSearch(keyword, sources) {
+    showLoading();
+    document.getElementById('resultsSection').style.display = 'none';
+    
+    const maxResults = document.getElementById('maxResults').value;
+    const similarity_Threshold = document.getElementById('similarity_Threshold').value;
+    
+    let endpoint; // Define endpoint here so it's available in catch block
+
+    try {
+        // This endpoint logic is fine, we leave it as is.
+        if (sources.length === 3 && sources.includes('dergipark') && sources.includes('yoktez') && sources.includes('trdizin')) {
+            endpoint = `/api/search?keyword=${encodeURIComponent(keyword)}&max_results=${maxResults}&similarity_threshold=${similarity_Threshold}`;
+        } else {
+            if (sources.length === 1) {
+                switch (sources[0]) {
+                    case 'dergipark':
+                        endpoint = `/api/dergipark?keyword=${encodeURIComponent(keyword)}&max_results=${maxResults}&similarity_threshold=${similarity_Threshold}`;
+                        break;
+                    case 'yoktez':
+                        endpoint = `/api/yoktez?keyword=${encodeURIComponent(keyword)}&max_results=${maxResults}&similarity_threshold=${similarity_Threshold}`;
+                        break;
+                    case 'trdizin':
+                        endpoint = `/api/trdizin?keyword=${encodeURIComponent(keyword)}&max_results=${maxResults}&similarity_threshold=${similarity_Threshold}`;
+                        break;
+                }
+            } else {
+                const sourcesParam = sources.join(',');
+                endpoint = `/api/search?keyword=${encodeURIComponent(keyword)}&max_results=${maxResults}&sources=${sourcesParam}&similarity_threshold=${similarity_Threshold}`;
+            }
+        }
+
+        console.log(`🚀 Making request to: ${API_BASE}${endpoint}`);
+
+        const response = await fetch(API_BASE + endpoint);
+
+        const contentType = response.headers.get('content-type') || '';
+        let data;
+
+        if (contentType.includes('application/json')) {
+            data = await response.json();
+        } else {
+            // ... (error handling)
+            return;
+        }
+
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        
+        let normalizedData = data; // Start with the original data
+        
+        // If we requested one source AND the response is missing the 'sources' key,
+        // it means we got the simple format that needs fixing.
+        if (sources.length === 1 && data.sources === undefined) {
+            console.warn("⚠️ Single-source response detected. Normalizing data structure...");
+            const sourceName = sources[0]; // e.g., 'dergipark'
+
+            // Manually build the nested structure that displayResults expects.
+            normalizedData = {
+                sources: {
+                    [sourceName]: {
+                        // This handles both cases: if `data` is the array itself, or if it's an object like { results: [...] }.
+                        results: Array.isArray(data) ? data : (data.results || []),
+                        count: Array.isArray(data) ? data.length : (data.count || (data.results ? data.results.length : 0))
+                    }
+                },
+                // Re-calculate total results if needed by your display function
+                total_results: Array.isArray(data) ? data.length : (data.count || (data.results ? data.results.length : 0))
+            };
+        }
+    
+
+        // Now, use `normalizedData` for all downstream operations.
+        console.log("🚨 DEBUGGING: Raw API Response Structure (Post-Normalization)");
+        console.log("Full data object:", normalizedData);
+        // ... (your other logs)
+
+
+        hideLoading();
+        
+        // 🎯 SINGLE CALL TO displayResults - Using the GUARANTEED CORRECT structure
+        if (typeof displayResults === 'function') {
+            // Pass the normalized data, not the original data!
+            displayResults(normalizedData, keyword, sources);
+        } else {
+            // ... (error handling)
+        }
+
+    } catch (err) {
+        // ... (your catch block)
+    }
+}
+
+// Focus on keyword input when page loads
+keywordInput.focus();
+    </script>
+</body>
+</html>
+        
